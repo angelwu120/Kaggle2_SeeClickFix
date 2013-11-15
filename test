@@ -1,0 +1,12 @@
+
+### Test ###
+train.rf.view <- randomForest(formula<-num_views ~ city + source + tag_type , data=train)
+train.rf.vote <- randomForest(formula<-num_votes ~ city + source + tag_type + num_views, data=train)
+train.rf.comm <- randomForest(formula<-num_comments ~ city + source + tag_type + num_views, data=train)
+
+#train.rf$importance
+#varImpPlot(train.rf)
+
+test$num_views <- predict(train.rf.view, test)
+test$num_votes <- predict(train.rf.vote, test)
+test$num_comments <- predict(train.rf.comm, test)
