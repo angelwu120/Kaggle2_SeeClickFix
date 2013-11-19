@@ -213,8 +213,8 @@ sample.rf$num_views <- test$num_views_rf
 sample.rf$num_votes <- test$num_votes_rf
 sample.rf$num_comments <- test$num_comments_rf
 
-sample.glm$num_views <- test$num_views_glm
-sample.glm$num_votes <- test$num_votes_glm
+sample.glm$num_views <- abs(test$num_views_glm)
+sample.glm$num_votes <- abs(test$num_votes_glm)
 sample.glm$num_comments <- ceiling(round(test$num_comments_glm,digit=2))
 
 write.csv(sample.rf,
