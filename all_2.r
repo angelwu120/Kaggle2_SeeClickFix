@@ -1,4 +1,3 @@
-
 library(randomForest)
 library(imputation)
 library(MASS)
@@ -216,7 +215,7 @@ sample.rf$num_comments <- test$num_comments_rf
 
 sample.glm$num_views <- test$num_views_glm
 sample.glm$num_votes <- test$num_votes_glm
-sample.glm$num_comments <- test$num_comments_glm
+sample.glm$num_comments <- ceiling(round(test$num_comments_glm,digit=2))
 
 write.csv(sample.rf,
           '~/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_rf.csv',
