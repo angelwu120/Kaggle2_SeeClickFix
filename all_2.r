@@ -81,11 +81,11 @@ test$tag_type<-as.character(test$tag_type)
 ### train set 
 train_miss_type<-subset(train, is.na(train$tag_type))
 
-train$tag_type[train$summary=="Abandoned Vehicle"]<-'abandoned_vehicles'
 train$tag_type[train$desription=="This issue was reported to 
                the City of Oakland Public Works Agency via phone (510-615-5566), 
                email (pwacallcenter@oaklandnet.com), or web (www.oaklandpw.com)."]<-'trash'
 train$tag_type[train$summary=="Illegal Dumping - debris, appliances, etc."] <-'trash'
+train$tag_type[agrep("abandoned", train$summary, ignore.case=TRUE)] <-'abandoned_vehicles'
 train$tag_type[agrep("Rodent", train$summary, ignore.case=TRUE)] <-'rodents'
 train$tag_type[agrep("park", train$summary, ignore.case=TRUE)] <-'parking_meter'
 train$tag_type[agrep("tree", train$summary, ignore.case=TRUE)] <-'tree'
@@ -131,6 +131,7 @@ test$tag_type[agrep("Vehicle", test$summary, ignore.case=TRUE)] <-'abandoned_veh
 test$tag_type[test$desription=="This issue was reported to 
               the City of Oakland Public Works Agency via phone (510-615-5566), 
               email (pwacallcenter@oaklandnet.com), or web (www.oaklandpw.com)."]<-'trash'
+test$tag_type[agrep("abandoned", test$summary, ignore.case=TRUE)] <-'abandoned_vehicles'
 test$tag_type[agrep("Dumping", test$summary, ignore.case=TRUE)] <-'trash'
 test$tag_type[agrep("Rodent", test$summary, ignore.case=TRUE)] <-'rodents'
 test$tag_type[agrep("tree", test$summary, ignore.case=TRUE)] <-'tree'
@@ -173,12 +174,12 @@ fulldata<-rbind(test,train)
 
 
 
-########################################
-### Cross Validation---Random Forest ###
-########################################
-formula<-num_views ~ city + source + tag_type + miss_type
-formula2<-num_votes ~ city + source + tag_type + miss_type + num_views
-formula3<-num_comments ~ city + source + tag_type + miss_type + num_views
+########################
+### Cross Validation ###
+########################
+formula<-num_views ~  city + source + tag_type + miss_type 
+formula2<-num_votes ~ city + source + tag_type + miss_type + num_views 
+formula3<-num_comments ~ city + source + tag_type + miss_type + num_views 
 
 train.cv1 <- train[1:111564,]
 train.cv2 <- train[111565:223128,]
@@ -246,10 +247,8 @@ write.csv(sample.rf,
           '/Users/Angie/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_rf2.csv',
           row.names = FALSE)
 write.csv(sample.glm,
-          '/Users/Angie/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_glm2.csv',
+          '/Users/Angie/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_glm3.csv',
           row.names = FALSE)
 write.csv(sample.lm,
           '/Users/Angie/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_lm.csv',
           row.names = FALSE)
-
-
