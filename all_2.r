@@ -81,11 +81,10 @@ test$tag_type<-as.character(test$tag_type)
 ### train set 
 train_miss_type<-subset(train, is.na(train$tag_type))
 
-train$tag_type[train$desription=="This issue was reported to 
-               the City of Oakland Public Works Agency via phone (510-615-5566), 
-               email (pwacallcenter@oaklandnet.com), or web (www.oaklandpw.com)."]<-'trash'
-train$tag_type[train$summary=="Illegal Dumping - debris, appliances, etc."] <-'trash'
-train$tag_type[agrep("abandoned", train$summary, ignore.case=TRUE)] <-'abandoned_vehicles'
+train$tag_type[agrep("pavement", train$summary, ignore.case=TRUE)] <-'sidewalk'
+train$tag_type[agrep("alley", train$summary, ignore.case=TRUE)] <-'street'
+train$tag_type[agrep("dumping", train$summary, ignore.case=TRUE)] <-'trash'
+train$tag_type[agrep("abandon", train$summary, ignore.case=TRUE)] <-'abandoned_vehicles'
 train$tag_type[agrep("Rodent", train$summary, ignore.case=TRUE)] <-'rodents'
 train$tag_type[agrep("park", train$summary, ignore.case=TRUE)] <-'parking_meter'
 train$tag_type[agrep("tree", train$summary, ignore.case=TRUE)] <-'tree'
@@ -110,7 +109,7 @@ train$tag_type[train$tag_type=="bad_driving"] <-'road_safety'
 train$tag_type[train$tag_type=="noise_complaint"] <-'noise_odor'
 train$tag_type[train$tag_type=="odor"] <-'noise_odor'
 train$tag_type[train$tag_type=="zoning"] <-'traffic'
-train$tag_type[train$tag_type=="crosswalk"] <-'traffic'
+train$tag_type[train$tag_type=="crosswalk"] <-'street'
 train$tag_type[train$tag_type=="drain_problem"] <-'pothole'
 train$tag_type[train$tag_type=="prostitutes"] <-'prostitution'
 
@@ -118,6 +117,7 @@ train$tag_type[train$tag_type=="prostitutes"] <-'prostitution'
 train$tag_type[train$tag_type=="public_art"] <-'other'
 train$tag_type[train$tag_type=="public_concern"] <-'other'
 train$tag_type[train$tag_type=="lost_and_found"] <-'other'
+train$tag_type[train$tag_type=="illegal_idling"] <-'other'
 
 train$tag_type[is.na(train$tag_type)]<- "other"
 train.other<-subset(train,tag_type=="other")
@@ -126,12 +126,10 @@ train.other<-subset(train,tag_type=="other")
 ### test set 
 test_miss_type<-subset(test, is.na(test$tag_type))
 
-test$tag_type[test$tag_type=='abandoned_vehicle']<-'abandoned_vehicles'
+test$tag_type[agrep("pavement", test$summary, ignore.case=TRUE)] <-'sidewalk'
+test$tag_type[agrep("alley", test$summary, ignore.case=TRUE)] <-'street'
 test$tag_type[agrep("Vehicle", test$summary, ignore.case=TRUE)] <-'abandoned_vehicles'
-test$tag_type[test$desription=="This issue was reported to 
-              the City of Oakland Public Works Agency via phone (510-615-5566), 
-              email (pwacallcenter@oaklandnet.com), or web (www.oaklandpw.com)."]<-'trash'
-test$tag_type[agrep("abandoned", test$summary, ignore.case=TRUE)] <-'abandoned_vehicles'
+test$tag_type[agrep("abandon", test$summary, ignore.case=TRUE)] <-'abandoned_vehicles'
 test$tag_type[agrep("Dumping", test$summary, ignore.case=TRUE)] <-'trash'
 test$tag_type[agrep("Rodent", test$summary, ignore.case=TRUE)] <-'rodents'
 test$tag_type[agrep("tree", test$summary, ignore.case=TRUE)] <-'tree'
@@ -148,6 +146,7 @@ test$tag_type[agrep("prostitutes", test$summary, ignore.case=TRUE)] <-'prostitut
 test$tag_type[agrep("trash", test$summary, ignore.case=TRUE)] <-'trash'
 
 ## integer similar tags
+test$tag_type[test$tag_type=='abandoned_vehicle']<-'abandoned_vehicles'
 test$tag_type[test$tag_type=="pedestrian_light"] <-'street_light'
 test$tag_type[test$tag_type=="roadkill"] <-'road_safety'
 test$tag_type[test$tag_type=="rodents"] <-'animal_problem'
@@ -155,12 +154,13 @@ test$tag_type[test$tag_type=="bad_driving"] <-'road_safety'
 test$tag_type[test$tag_type=="noise_complaint"] <-'noise_odor'
 test$tag_type[test$tag_type=="odor"] <-'noise_odor'
 test$tag_type[test$tag_type=="zoning"] <-'traffic'
-test$tag_type[test$tag_type=="crosswalk"] <-'traffic'
+test$tag_type[test$tag_type=="crosswalk"] <-'street'
 test$tag_type[test$tag_type=="drain_problem"] <-'pothole'
 test$tag_type[test$tag_type=="prostitutes"] <-'prostitution'
 
 ## change "small tages" into "other"
 test$tag_type[test$tag_type=="bus_lane"] <-'other'
+test$tag_type[test$tag_type=="illegal_idling"] <-'other'
 
 test$tag_type[is.na(test$tag_type)]<- "other"
 test.other<-subset(test,tag_type=="other")
@@ -196,18 +196,25 @@ train.cv1$pred_rf <- predict(train.cv1.rf, train.cv1)
 train.cv1$pred_glm <- predict(train.cv1.glm, train.cv1)
 
 ### Test ###
+train.s<-subset(train, num_views<4)
+
+
 ## Random Forest
 train.rf.view <- randomForest(formula, data=train)
 train.rf.vote <- randomForest(formula2, data=train)
 train.rf.comm <- randomForest(formula3, data=train)
+train.s.rf.view <- randomForest(formula, data=train.s)
+train.s.rf.vote <- randomForest(formula2, data=train.s)
+train.s.rf.comm <- randomForest(formula3, data=train.s)
+
 ## GLM
 train.glm.view <- glm(formula, data=train)
 train.glm.vote <- glm(formula2, data=train)
 train.glm.comm <- glm(formula3, data=train)
-## LM
-train.lm.view <- lm(formula, data=train)
-train.lm.vote <- lm(formula2, data=train)
-train.lm.comm <- lm(formula3, data=train)
+train.s.glm.view <- glm(formula, data=train.s)
+train.s.glm.vote <- glm(formula2, data=train.s)
+train.s.glm.comm <- glm(formula3, data=train.s)
+
 
 #train.rf$importance
 #varImpPlot(train.rf)
@@ -215,14 +222,17 @@ train.lm.comm <- lm(formula3, data=train)
 test$num_views_rf <- predict(train.rf.view, test)
 test$num_votes_rf <- predict(train.rf.vote, test)
 test$num_comments_rf <- predict(train.rf.comm, test)
+test$num_views_rf <- predict(train.s.rf.view, test)
+test$num_votes_rf <- predict(train.s.rf.vote, test)
+test$num_comments_rf <- predict(train.s.rf.comm, test)
 
 test$num_views_glm <- predict(train.glm.view, test)
 test$num_votes_glm <- predict(train.glm.vote, test)
 test$num_comments_glm <- predict(train.glm.comm, test)
 
-test$num_views_lm <- predict(train.lm.view, test)
-test$num_votes_lm <- predict(train.lm.vote, test)
-test$num_comments_lm <- predict(train.lm.comm, test)
+test$num_views_glm <- predict(train.s.glm.view, test)
+test$num_votes_glm <- predict(train.s.glm.vote, test)
+test$num_comments_glm <- predict(train.s.glm.comm, test)
 
 ######################
 ### Export results ###
@@ -239,16 +249,12 @@ sample.glm$num_views <- abs(test$num_views_glm)
 sample.glm$num_votes <- abs(test$num_votes_glm)
 sample.glm$num_comments <- abs(test$num_comments_glm)
 
-sample.lm$num_views <- abs(test$num_views_lm)
-sample.lm$num_votes <- abs(test$num_votes_lm)
-sample.lm$num_comments <- abs(test$num_comments_lm)
+
 
 write.csv(sample.rf,
-          '/Users/Angie/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_rf2.csv',
+          '/Users/Angie/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_rf4.csv',
           row.names = FALSE)
 write.csv(sample.glm,
-          '/Users/Angie/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_glm3.csv',
+          '/Users/Angie/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_glm5.csv',
           row.names = FALSE)
-write.csv(sample.lm,
-          '/Users/Angie/Desktop/RPI/Courses/MGMT 6963/assignment/2/predict_lm.csv',
-          row.names = FALSE)
+
